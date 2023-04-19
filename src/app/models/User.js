@@ -16,6 +16,9 @@ const User = new Schema({
     unique: false,
     required: true
   },
+  avatar: {
+    type:String,
+  },
   email: {
     type:String,
     unique:true,

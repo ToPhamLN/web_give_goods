@@ -29,6 +29,9 @@ const Blog = new Schema({
         type: String,
         required: true,
     },
+    author: {
+        type: String,
+    },
     // slug: {
     //     type: String,
     //     slug: 'title',
