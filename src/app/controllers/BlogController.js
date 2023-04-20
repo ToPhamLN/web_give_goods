@@ -71,7 +71,7 @@ const BlogController = {
     // [PUT] blog/store/:_id/edit
     putBlog: async (req, res, next) => {
         try {
-            const newBlog = await new Blog({
+            const newBlog = {
                 title: req.body.title,
                 description: req.body.description,
                 numberPhone: req.body.numberPhone,
@@ -79,8 +79,12 @@ const BlogController = {
                 address: req.body.address,
                 city: req.body.city,                               
                 author: req.user.userID,
-            })
-            const blog = newBlog.updateOne({ _id: req.body._id });
+            };
+            // console.log(newBlog);
+            const blog = await Blog.updateOne(
+                { _id: req.body._id },
+                { $set: newBlog },                
+            );
             res.status(200).json({ message: 'Updated successfully' });
         } catch(err) {
             return res.status(500).json(err);

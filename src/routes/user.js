@@ -7,8 +7,8 @@ const token = require('../middleware/Token');
 router.get('/', token.verifyToken, userController.indexUser);
 router.get('/store/:_id', token.verifyToken, userController.getUser);
 router.delete('/store/:_id', token.verifyTokenAndUserAuthorization, userController.deleteUser);
-router.get('/store/:_id/edit', token.verifyTokenAndUserAuthorization, userController.getEditBlog);
-router.put('/store/:_id/edit', token.verifyTokenAndUserAuthorization, userController.putBlog);
+router.get('/store/:_id/edit', token.verifyTokenAndUserAuthorization, userController.getEditUser);
+router.put('/store/:_id/edit', token.verifyTokenAndUserAuthorization, userController.putUser);
 
 // router.put('store/:userID', token.verifyTokenAndUserAuthorization);
 module.exports = router;

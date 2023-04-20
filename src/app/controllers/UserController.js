@@ -55,7 +55,7 @@ const UserController = {
     },
 
     // [GET] /user/store/:_id/edit
-    getEditBlog: async (req, res, next) => {
+    getEditUser: async (req, res, next) => {
         try{
             const user = await User.findOne({ _id: req.params._id });
             res.status(200).json(user);            
@@ -65,19 +65,22 @@ const UserController = {
     },
 
     // [PUT] /user/store/:_id/edit
-    putBlog: async (req, res, next) => {
+    putUser: async (req, res, next) => {
         try {            
-            console.log(req.body);
-            const newUser = await new User({
+            // console.log(req.body);
+            const newUser = {
                 username: req.body.username,
                 numberPhone: req.body.numberPhone,
                 // avatar: req.body.avatar,
                 email: req.body.email,
                 password: req.body.password,                
-            });
-            const user = await newUser.updateOne({ _id: req.params._id });
-            res.status(200).json(user);            
-        } catch {
+            };
+            const user = await User.updateOne(
+                { _id: req.params._id },
+                { $set:  newUser }             
+            );           
+            res.status(200).json({message: 'Updated user successfully'});            
+        } catch (err) {
             return res.status(500).json(err);
         };
     },
