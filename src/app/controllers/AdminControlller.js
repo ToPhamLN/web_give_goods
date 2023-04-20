@@ -17,12 +17,12 @@ const AdminController = {
         }catch(err){
             return res.status(500).json(err);
         }
-    },
+    },    
 
     // [GET] /admin/blogs       : Get all blog for admin
     getAllBlog: async (req, res, next) => {
         res.status(200).json({
-            message: 'Welcome to Users Page',
+            message: 'Welcome to Blogs Page',
         });
     },
 }

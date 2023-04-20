@@ -24,11 +24,29 @@ const UserController = {
         }catch(err){
             return res.status(500).json(err);
         }
-    },    
+    }, 
+    
+    // [GET] /admin/users/search?
+    getAllUserSS: async (req, res, next) => {
+        let formData = [];
+        let sort = {};
+        let objectWhere = {};
+        
+        // console.log(req.query);
+        formData.keyword = req.query.keyword;
+        formData.sortBy = req.query.sortBy;
+        formData.sortDir = req.query.sortDir;
+
+        if(formData.keyword !== '') objectWhere.name = new RegExp(formData.keyword, 'i');
+        if (formData.sortBy) sort[formData.sortBy] = formData.sortDir;
+        const user = await User
+            .find(objectWhere)
+            .sort(sort)
+    },
 
     // [GET] user/store/:_id           : Get a user information
     getUser: async (req, res, next) => {
-        try{
+        try{            
             const user = await User.findOne({ _id: req.params._id });
             res.status(200).json(user);            
         }catch(err){
@@ -39,7 +57,7 @@ const UserController = {
     // [GET] /user/store/:_id/edit
     getEditBlog: async (req, res, next) => {
         try{
-            const user = await User.findOne({ id: req.params._id });
+            const user = await User.findOne({ _id: req.params._id });
             res.status(200).json(user);            
         }catch(err){
             res.status(500).json(err);
@@ -48,13 +66,14 @@ const UserController = {
 
     // [PUT] /user/store/:_id/edit
     putBlog: async (req, res, next) => {
-        try {
+        try {            
+            console.log(req.body);
             const newUser = await new User({
-                username: req.user.username,
-                numberPhone: req.user.numberPhone,
-                avatar: req.user.avatar,
-                email: req.user.email,
-                password: req.user.password
+                username: req.body.username,
+                numberPhone: req.body.numberPhone,
+                // avatar: req.body.avatar,
+                email: req.body.email,
+                password: req.body.password,                
             });
             const user = await newUser.updateOne({ _id: req.params._id });
             res.status(200).json(user);            

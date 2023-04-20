@@ -24,6 +24,16 @@ const SiteController = {
     // [POST] /signup 
     postSignup: async(req, res) => {
         try{
+            const existedUser = await User.findOne({
+                $or: [{ username: req.body.username }, { email: req.body.email }],
+              });
+            if (existedUser) {
+                return res.status(400).json({
+                  status: false,
+                  message: "user existed",
+                });
+            }
+            
             const salt = await bcrypt.genSalt(10);
             const hashed = await bcrypt.hash(req.body.password, salt);
             // Create the new user account
@@ -76,7 +86,7 @@ const SiteController = {
     
     // [POST] /login
     postLogin: async(req, res) => {
-        try{
+        try{            
             const user = await User.findOne({email: req.body.email})
             if(!user) {
                 return res.status(404).json({message: 'User not found!'});

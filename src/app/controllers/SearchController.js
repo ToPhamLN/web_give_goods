@@ -45,4 +45,59 @@ const SearchController = {
             return res.status(500).json(err);
         }
     },
+    /////////////////////////////////////////////////////////
+    search: async (res, res, next) => {
+        try {
+            let params = [];
+            params.keyword = req.query.keyword;
+            params.sortField = req.query.orderBy;
+            params.sortType = req.query.orderDir;
+
+            const data = await MainModel.listItems(params , {'task' : 'all'});
+            res.status(200).json({
+                message: "Success",
+                data: data, 
+            });
+
+        } catch (err) {
+            res.status(400).json({ message: 'Not Found'});
+        }        
+    },
+
+    listItems: (params, options) => {
+        let sort = {};
+        let objectWhere = {};
+        if (params.keyword !== '') objectWhere.name = new RegExp(params.keyword, 'i');
+
+        if (params.sortField) sort[params.sortField] = params.sortType;
+        // get all
+        if (options.task === 'all') {
+            return MainModel
+                .find(objectWhere)
+                .select('id name status')
+                .sort(sort)                
+        }
+        //get one
+        if (options.task === 'one') {
+            return MainModel
+                .find({_id : params._id})
+                .select('id name status')
+        }
+    },
+
+    createItem : (item) => {
+        return new MainModel(item).save();
+    },
+
+    deleteItem : (params, option) => {
+        if(option.task === 'one') {
+            return MainModel.deleteOne({ id: params.id })
+        }
+    },
+
+    editItem: (params, option) => {
+        if(option.task === 'edit') {
+            return MainModel.updateOne({ id: params.id }, params.body)
+        }
+    },
 };
