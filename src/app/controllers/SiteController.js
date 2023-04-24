@@ -2,6 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { default: mongoose } = require('mongoose');
+const { ChangeToSlug } = require('../../Javascript/ConvertSlug');
+
 
 let refreshTokens = [];
 
@@ -41,7 +43,8 @@ const SiteController = {
                username: req.body.username,
                email: req.body.email,
                numberPhone: req.body.numberPhone,
-               password: hashed,                                         
+               password: hashed,
+               slug: ChangeToSlug((req.body.username + req.body.numberPhone + req.body.email)),                                                        
             });            
             
             //Save the new user
@@ -119,6 +122,7 @@ const SiteController = {
         }
     },
 
+    // [GET] /refresh
     requestRefreshToken: async (req, res, next) => {
         //Take refresh token from user
         const refreshToken = req.cookies.refreshToken;
@@ -149,7 +153,7 @@ const SiteController = {
         });
       },
     
-    //LOG OUT
+    // [GET] /logout
     logOut: async (req, res, next) => {
         //Clear cookies when user logs out
         refreshTokens = refreshTokens.filter((token) => token !== req.body.token);

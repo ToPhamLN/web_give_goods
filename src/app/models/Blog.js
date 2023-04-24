@@ -15,7 +15,7 @@ const Blog = new Schema({
     },    
     image: {
         type: String,
-        required: true,
+        required: true,        
     },
     address: {
         type: String,
@@ -30,11 +30,14 @@ const Blog = new Schema({
         required: true,
     },
     author: {
-        type: String,
+        type: String,        
+    },
+    slug: {
+        type: String,               
     },
     // slug: {
     //     type: String,
-    //     slug: 'title',
+    //     slug: ["title", "description"],
     //     unique: true,
     // }    
 },

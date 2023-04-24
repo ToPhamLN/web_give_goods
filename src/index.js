@@ -31,7 +31,7 @@ app.use(
 
 app.use(express.json());
 
-//Routes inint
+//Routes init
 route(app);
 
 

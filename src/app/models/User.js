@@ -17,7 +17,7 @@ const User = new Schema({
     required: true
   },
   avatar: {
-    type:String,
+    type: String,
   },
   email: {
     type:String,
@@ -31,10 +31,14 @@ const User = new Schema({
     unique: false,   
     required: true
   },
+  slug: { 
+    type:String,
+    unique: true,
+  },
   isAdmin: {
     type:Boolean,
     default: false,
-  },
+  }, 
 },
 {
   timestamps: true,
