@@ -9,5 +9,4 @@ router.get('/users', token.verifyTokenAndAdmin, userController.getAllUser);
 router.post('/users/search', token.verifyTokenAndAdmin, userController.searchUser);
 // router.get('/blogs', Token.verifyTokenAndAdmin, blogController.getAllBlog);
 
-
 module.exports = router;
