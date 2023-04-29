@@ -2,7 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {default: mongoose} = require('mongoose');
-const {ChangeToSlug} = require('../../Javascript/ConvertSlug');
+const {ChangeToSlug} = require('../../util/ConvertSlug');
 
 let refreshTokens = [];
 
@@ -42,9 +42,7 @@ const SiteController = {
         email: req.body.email,
         numberPhone: req.body.numberPhone,
         password: hashed,
-        slug: ChangeToSlug(
-          req.body.username + req.body.numberPhone + req.body.email
-        ),
+        slug: ChangeToSlug(req.body.username + req.body.numberPhone + req.body.email),
       });
 
       //Save the new user
@@ -92,10 +90,7 @@ const SiteController = {
       if (!user) {
         return res.status(404).json({message: 'User not found!'});
       }
-      const validPassword = await bcrypt.compare(
-        req.body.password,
-        user.password
-      );
+      const validPassword = await bcrypt.compare(req.body.password, user.password);
       if (!validPassword) {
         return res.status(404).json({message: 'Wrong password!'});
       }

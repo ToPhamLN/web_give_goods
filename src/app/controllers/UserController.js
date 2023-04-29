@@ -1,7 +1,7 @@
 const {response} = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const {ChangeToSlug} = require('../../Javascript/ConvertSlug');
+const {ChangeToSlug} = require('../../util/ConvertSlug');
 const cloudinary = require('cloudinary').v2;
 
 const UserController = {
@@ -24,6 +24,12 @@ const UserController = {
     try {
       const user = await User.find().sort([['createdAt', -1]]);
       res.status(200).json({user});
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: 'no users',
+        });
+      }
     } catch (err) {
       return res.status(500).json(err);
     }
@@ -35,14 +41,24 @@ const UserController = {
       const q = req.query.q;
       console.log(q);
       let keyUser = undefined;
-      if (q !== '') keyUser = new RegExp(ChangeToSlug(q));
+      if (q !== '') {
+        keyUser = new RegExp(ChangeToSlug(q));
+      } else {
+        return res.status(404).json({
+          status: false,
+          message: 'Please enter keywords',
+        });
+      }
       console.log(keyUser);
       const user = await User.find({
         slug: {$regex: keyUser, $options: 'i'},
       });
       res.status(200).json(user);
     } catch (err) {
-      return res.status(500).json(err);
+      return res.status(404).json({
+        status: false,
+        message: 'user not found',
+      });
     }
   },
 
@@ -52,7 +68,10 @@ const UserController = {
       const user = await User.findOne({_id: req.params._id});
       res.status(200).json(user);
     } catch (err) {
-      res.status(500).json(err);
+      return res.status(404).json({
+        status: false,
+        message: 'User not found',
+      });
     }
   },
 
@@ -60,36 +79,64 @@ const UserController = {
   getEditUser: async (req, res, next) => {
     try {
       const user = await User.findOne({_id: req.params._id});
-      // req.userData = user;
-      console.log(req.userData);
+      console.log(req.req.user);
       res.status(200).json(user);
     } catch (err) {
-      res.status(500).json(err);
+      return res.status(404).json({
+        status: false,
+        message: 'user not found',
+      });
     }
   },
 
   // [PUT] /user/store/:_id/edit
   putUser: async (req, res, next) => {
     try {
-      const userData = req.user;
-      const fileData = req.file;
-      const salt = await bcrypt.genSalt(10);
-      const hashed = await bcrypt.hash(req.body.password, salt);
-      console.log(fileData, userData, ChangeToSlug(req.body.username));
-      const newUser = {
+      const user = await User.findOne({_id: req.params._id});
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: 'user not found',
+        });
+      }
+      const delPublic = user.public;
+
+      const existedUser = await User.findOne({
+        $or: [{username: req.body.username}, {email: req.body.email}],
+      });
+      if (existedUser) {
+        return res.status(400).json({
+          status: false,
+          message: 'user existed',
+        });
+      }
+      let newUser = {
         username: req.body.username,
         numberPhone: req.body.numberPhone,
-        avatar: fileData.path,
+        avatar: req.file.path,
+        public: req.file.filename,
         email: req.body.email,
-        password: hashed,
-        slug: ChangeToSlug(
-          req.body.username + req.body.numberPhone + req.body.email
-        ),
+        slug: ChangeToSlug(req.body.username + req.body.numberPhone + req.body.email),
       };
-      const user = await User.updateOne({_id: req.params._id}, {$set: newUser});
-      res.status(200).json({message: 'Updated user successfully'});
+
+      if (req.body.password) {
+        const saltN = await bcrypt.genSalt(10);
+        const hashedN = await bcrypt.hash(req.body.password, saltN);
+        newUser.password = hashedN;
+      }
+
+      console.log(req.file, req.user, user, newUser, delPublic);
+      const userN = await User.updateOne({_id: req.params._id}, {$set: newUser});
+      if (delPublic) {
+        const delAvt = await cloudinary.uploader.destroy(delPublic);
+        console.log(delAvt);
+      }
+      res.status(200).json({
+        message: 'Updated user successfully',
+        userN,
+      });
     } catch (err) {
-      if (fileData) cloudinary.uploader.destroy(fileData.filename);
+      if (req.file) cloudinary.uploader.destroy(req.file.filename);
       return res.status(500).json(err);
     }
   },
@@ -97,14 +144,36 @@ const UserController = {
   // [DELETE] /user/store/:_id       : Delete user
   deleteUser: async (req, res, next) => {
     try {
-      // const userData = await User.findOne({ _id: req.params._id });
-      // let imagePath = userData.avatar;
-      // console.log(imagePath);
-      const user = await User.findOneAndDelete({_id: req.params._id});
-      console.log(user);
-      // if (user) cloudinary.uploader.destroy({ 'path': imagePath });
-      res.status(200).json({message: 'Delete successfully!'});
+      const user = await User.findOne({_id: req.params._id});
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: 'User not found',
+        });
+      }
+      const delPublic = user.public;
+      const userD = await User.findOneAndDelete({_id: req.params._id});
+      const delAvt = await cloudinary.uploader.destroy(delPublic);
+      res.status(200).json({
+        message: 'Delete successfully!',
+        userD,
+        delAvt,
+      });
     } catch (err) {
+      return res.status(500).json(err);
+    }
+  },
+
+  text: async (req, res, next) => {
+    try {
+      console.log(req.file, req.user, req.body);
+      const {error} = cloudinary.uploader.destroy('web_give_goods/l3csi10sbticpauh14j1');
+      if (error) {
+        res.json('not_found');
+      }
+      res.status(200).json({message: 'Updated user successfully'});
+    } catch (err) {
+      if (req.file) cloudinary.uploader.destroy(req.file.filename);
       return res.status(500).json(err);
     }
   },

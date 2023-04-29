@@ -19,6 +19,11 @@ const User = new Schema(
     },
     avatar: {
       type: String,
+      default: '',
+    },
+    public: {
+      type: String,
+      default: '',
     },
     email: {
       type: String,

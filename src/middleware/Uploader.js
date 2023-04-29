@@ -10,10 +10,11 @@ cloudinary.config({
 });
 
 const storage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary: cloudinary,
   allowedFormats: ['jpg', 'png'],
   params: {
     folder: 'web_give_goods',
+    transformation: [{width: 500, height: 500, crop: 'limit'}],
   },
 });
 

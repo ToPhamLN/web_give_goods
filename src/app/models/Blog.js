@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-// const slug = require('mongoose-slug-generator');
-// const mongooseDelete = require('mongoose-delete');
-
 const Schema = mongoose.Schema;
 
 const Blog = new Schema(
@@ -16,7 +13,9 @@ const Blog = new Schema(
     },
     image: {
       type: String,
-      required: true,
+    },
+    public: {
+      type: String,
     },
     address: {
       type: String,
@@ -33,23 +32,14 @@ const Blog = new Schema(
     author: {
       type: String,
     },
+    authorID: {
+      type: String,
+    },
     slug: {
       type: String,
     },
-    // slug: {
-    //     type: String,
-    //     slug: ["title", "description"],
-    //     unique: true,
-    // }
   },
   {timestamps: true}
 );
-
-//Add plugin
-// mongoose.plugin(slug);
-// Blog.plugin(mongooseDelete, {
-//     overrideMethods: true,
-//     deletedAt : true,
-// });
 
 module.exports = mongoose.model('Blog', Blog);
